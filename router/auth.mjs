@@ -7,6 +7,7 @@ const authRouter = Router();
 
 //authen api register
 authRouter.post('/register', async (req, res) => {
+    try {
     const user = {
         email: req.body.email,
         password: req.body.password,
@@ -46,10 +47,15 @@ authRouter.post('/register', async (req, res) => {
         );
     
     res.status(200).json({message: 'User registered successfully'});
+} catch (error) {
+    res.status(500).json({message: 'Internal server error'});
+}
 });
+;
 
 //api login
 authRouter.post('/login', async (req, res) => {
+    try {
     const user = {
         email: req.body.email,
         password: req.body.password,
@@ -75,6 +81,9 @@ authRouter.post('/login', async (req, res) => {
         expiresIn: '900000'
     });
     res.status(200).json({message: 'User logged in successfully', token});
+    } catch (error) {
+        res.status(500).json({message: 'Internal server error'});
+    }
 
   
 });
