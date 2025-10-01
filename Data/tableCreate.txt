@@ -1,0 +1,28 @@
+CREATE TABLE users (
+  userId     SERIAL PRIMARY KEY,
+  email      VARCHAR(255) NOT NULL UNIQUE,
+  password   VARCHAR(255) NOT NULL,
+  firstname  VARCHAR(100) NOT NULL,
+  lastname   VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE books (
+  bookId      SERIAL PRIMARY KEY,
+  name        VARCHAR(255) NOT NULL,
+  description TEXT,
+  author      VARCHAR(255) NOT NULL,
+  url         VARCHAR(500),
+  category    VARCHAR(100),
+  create_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  update_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_books_url UNIQUE (url)
+);
+
+CREATE TABLE bookList (
+  listId     SERIAL PRIMARY KEY,
+  userId     INT NOT NULL REFERENCES users(userId) ON DELETE CASCADE,
+  bookId     INT NOT NULL REFERENCES books(bookId) ON DELETE CASCADE,
+  create_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  update_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_booklist_user_book UNIQUE (userId, bookId)
+);

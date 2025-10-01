@@ -1,0 +1,523 @@
+openapi: 3.0.0
+info:
+  title: Book Management API
+  description: A RESTful API for managing books and user authentication
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+servers:
+  - url: http://localhost:4000
+    description: Development server
+security:
+  - BearerAuth: []
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstname
+                - lastname
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "password123"
+                firstname:
+                  type: string
+                  example: "John"
+                lastname:
+                  type: string
+                  example: "Doe"
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+        '400':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User already exists"
+        '401':
+          description: Password too short
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password must be at least 8 characters long"
+        '402':
+          description: Invalid email format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid email"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user and return JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User logged in successfully"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '403':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        '404':
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid password"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /books:
+    get:
+      tags:
+        - Books
+      summary: Get user's books
+      description: Retrieve all books in user's booklist with optional filters
+      parameters:
+        - name: category
+          in: query
+          description: Filter by book category
+          required: false
+          schema:
+            type: string
+            example: "fantasy"
+        - name: name
+          in: query
+          description: Filter by book name (partial match)
+          required: false
+          schema:
+            type: string
+            example: "harry"
+        - name: author
+          in: query
+          description: Filter by author name (partial match)
+          required: false
+          schema:
+            type: string
+            example: "rowling"
+      responses:
+        '200':
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Harry Potter"
+                    description:
+                      type: string
+                      example: "A fantasy novel"
+                    author:
+                      type: string
+                      example: "J.K. Rowling"
+                    url:
+                      type: string
+                      example: "https://example.com"
+                    category:
+                      type: string
+                      example: "fantasy"
+                    create_at:
+                      type: string
+                      format: date-time
+                      example: "2024-01-15T10:30:00.000Z"
+                    update_at:
+                      type: string
+                      format: date-time
+                      example: "2024-01-15T10:30:00.000Z"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "token has invalid format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+    post:
+      tags:
+        - Books
+      summary: Add book to user's list
+      description: Add a new book to the user's booklist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - author
+                - url
+                - category
+              properties:
+                name:
+                  type: string
+                  example: "Harry Potter"
+                description:
+                  type: string
+                  example: "A fantasy novel about a young wizard"
+                author:
+                  type: string
+                  example: "J.K. Rowling"
+                url:
+                  type: string
+                  example: "https://example.com/harry-potter"
+                category:
+                  type: string
+                  example: "fantasy"
+      responses:
+        '200':
+          description: Book added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book added to booklist successfully"
+        '400':
+          description: Book already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book already exists"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "token has invalid format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /books/{bookid}:
+    put:
+      tags:
+        - Books
+      summary: Update book
+      description: Update an existing book in user's booklist
+      parameters:
+        - name: bookid
+          in: path
+          required: true
+          description: Book ID
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - author
+                - url
+                - category
+              properties:
+                name:
+                  type: string
+                  example: "Harry Potter Updated"
+                description:
+                  type: string
+                  example: "Updated description"
+                author:
+                  type: string
+                  example: "J.K. Rowling"
+                url:
+                  type: string
+                  example: "https://example.com/updated"
+                category:
+                  type: string
+                  example: "fantasy"
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book updated successfully"
+        '400':
+          description: Book not found or not in user's list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book not found in user's booklist"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "token has invalid format"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+    delete:
+      tags:
+        - Books
+      summary: Delete book
+      description: Delete a book from user's booklist
+      parameters:
+        - name: bookid
+          in: path
+          required: true
+          description: Book ID
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Book deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book deleted successfully"
+        '400':
+          description: Book not found or not in user's list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book not found in user's booklist"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "token has invalid format"
+        '501':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+  schemas:
+    Book:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Harry Potter"
+        description:
+          type: string
+          example: "A fantasy novel"
+        author:
+          type: string
+          example: "J.K. Rowling"
+        url:
+          type: string
+          example: "https://example.com"
+        category:
+          type: string
+          example: "fantasy"
+        create_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00.000Z"
+        update_at:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00.000Z"
+
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        firstname:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Doe"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Error message"
+        error:
+          type: string
+          example: "Detailed error information"
